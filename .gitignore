@@ -72,3 +72,9 @@ build/
 *.userosscache
 *.sln.docstates
 **/.vs/
+
+
+# New custom ignores
+appsettings.json
+DEPLOYMENT_HEBREW.md
+DEPLOYMENT_CHECKLIST.md
