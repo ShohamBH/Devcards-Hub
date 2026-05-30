@@ -1,0 +1,16 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Supabase": {
+    "Url": "https://your-project.supabase.co",
+    "Key": "your-supabase-anon-key"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=your-db-host;Database=postgres;Username=postgres;Password=your-password;Port=5432;SSL Mode=Require;Trust Server Certificate=true;"
+  },
+  "AllowedOrigins": "http://localhost:5173,http://localhost:3000"
+}
