@@ -15,6 +15,7 @@ export type ThemeType = 'default' | 'dark' | 'vscode' | 'retro' | 'gradient' | '
 
 export interface DeveloperCardData {
   id?: string;
+  userId?: string; // Add userId to link cards to authenticated users
   fullName: string;
   title: string;
   bio: string;

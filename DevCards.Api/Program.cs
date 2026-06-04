@@ -25,6 +25,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// הוספת SQLite Database
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=devcards.db"));
+
 // הוספת Global Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
