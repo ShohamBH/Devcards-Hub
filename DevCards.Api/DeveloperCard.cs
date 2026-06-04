@@ -25,6 +25,9 @@ namespace DevCards.Api
         [Column("theme_name")]
         public string ThemeName { get; set; } = "default";
 
+        [Column("user_id")]
+        public string? UserId { get; set; }
+
         [Column("skills")]
         [JsonPropertyName("skills")]
         public List<string>? Skills { get; set; }

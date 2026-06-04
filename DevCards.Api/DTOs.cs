@@ -13,6 +13,7 @@ namespace DevCards.Api
         public Dictionary<string, string> SocialLinks { get; set; } = new();
         public List<ProjectInfo> Projects { get; set; } = new();
         public string ThemeName { get; set; } = "default";
+        public string? UserId { get; set; }
     }
 
     public class ProjectInfo
@@ -33,6 +34,7 @@ namespace DevCards.Api
         public Dictionary<string, string> SocialLinks { get; set; } = new();
         public List<ProjectInfo> Projects { get; set; } = new();
         public string ThemeName { get; set; } = "default";
+        public string? UserId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

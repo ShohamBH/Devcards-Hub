@@ -19,7 +19,6 @@ namespace DevCards.Api.Controllers
             _logger = logger;
         }
 
-        // 1. POST: api/cards - שמירת כרטיס חדש ויצירת UUID
         [HttpPost]
         public async Task<IActionResult> CreateCard([FromBody] CreateCardRequest request)
         {
@@ -33,12 +32,12 @@ namespace DevCards.Api.Controllers
 
             var card = new DeveloperCard
             {
-                // לא מגדירים ID - תנו ל-Supabase ליצור אותו
                 FullName = request.FullName,
                 Title = request.Title,
                 Bio = request.Bio,
                 AvatarUrl = request.AvatarUrl,
                 ThemeName = request.ThemeName,
+                UserId = request.UserId,
                 Skills = request.Skills,
                 SocialLinks = request.SocialLinks,
                 Projects = request.Projects,
@@ -59,7 +58,89 @@ namespace DevCards.Api.Controllers
             return Ok(MapToResponse(savedCard));
         }
 
-        // 2. GET: api/cards/{id} - שליפת כרטיס לפי UUID בשביל עמוד הנחיתה הציבורי
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCardsCount()
+        {
+            try
+            {
+                var response = await _supabase
+                    .From<DeveloperCard>()
+                    .Select("id")
+                    .Get();
+
+                var count = response.Models?.Count() ?? 0;
+                _logger.LogInformation("Retrieved total card count: {Count}", count);
+
+                return Ok(new { count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching card count");
+                return StatusCode(500, new { error = "Failed to fetch card count" });
+            }
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetCardByUserId(string userId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching card for user ID: {UserId}", userId);
+                
+                var response = await _supabase
+                    .From<DeveloperCard>()
+                    .Where(x => x.UserId == userId)
+                    .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
+                    .Limit(1)
+                    .Get();
+
+                var card = response.Models?.FirstOrDefault();
+                
+                if (card == null)
+                {
+                    _logger.LogInformation("No card found for user ID: {UserId}", userId);
+                    return NotFound();
+                }
+
+                _logger.LogInformation("Card found for user ID: {UserId}, Card ID: {CardId}", userId, card.Id);
+                return Ok(MapToResponse(card));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching card for user ID: {UserId}", userId);
+                return StatusCode(500, "Failed to fetch user card");
+            }
+        }
+
+        // PATCH: api/cards/{id}/link - Link card to user
+        [HttpPatch("{id}/link")]
+        public async Task<IActionResult> LinkCardToUser(Guid id, [FromBody] LinkUserRequest request)
+        {
+            try
+            {
+                var card = await _supabase
+                    .From<DeveloperCard>()
+                    .Where(x => x.Id == id)
+                    .Single();
+
+                if (card == null)
+                {
+                    return NotFound();
+                }
+
+                card.UserId = request.UserId;
+                await _supabase.From<DeveloperCard>().Update(card);
+
+                _logger.LogInformation("Card {CardId} linked to user {UserId}", id, request.UserId);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error linking card {CardId} to user", id);
+                return StatusCode(500, "Failed to link card to user");
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCard(Guid id)
         {
@@ -91,14 +172,20 @@ namespace DevCards.Api.Controllers
                 Id = card.Id.ToString(),
                 FullName = card.FullName,
                 Title = card.Title,
-                Bio = card.Bio,
-                AvatarUrl = card.AvatarUrl,
+                Bio = card.Bio ?? string.Empty,
+                AvatarUrl = card.AvatarUrl ?? string.Empty,
                 ThemeName = card.ThemeName,
+                UserId = card.UserId,
                 CreatedAt = card.CreatedAt,
                 Skills = card.Skills ?? new(),
                 SocialLinks = card.SocialLinks ?? new(),
                 Projects = card.Projects ?? new()
             };
         }
+    }
+
+    public class LinkUserRequest
+    {
+        public string UserId { get; set; } = string.Empty;
     }
 }
